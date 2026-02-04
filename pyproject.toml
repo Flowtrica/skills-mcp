@@ -1,0 +1,52 @@
+[project]
+name = "skills-mcp"
+version = "0.1.14-progressive-disclosure"
+description = "MCP server that exposes Claude-style skills to any MCP client."
+readme = "README.md"
+authors = [
+    { name = "Eleanor Berger", email = "eleanor@intellectronica.net" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "fastmcp>=2.2.5",
+    "pyyaml>=6.0",
+]
+license = { file = "LICENSE" }
+keywords = ["mcp", "skills", "fastmcp", "claude"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
+
+[project.urls]
+Homepage = "https://github.com/Flowtrica/skills-mcp"
+Issues = "https://github.com/Flowtrica/skills-mcp/issues"
+
+[project.scripts]
+skills-mcp = "skillz.__main__:run"
+
+[build-system]
+requires = ["uv_build>=0.9.5,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+    "pytest-asyncio>=0.23.7",
+    "ruff>=0.6.9",
+]
+
+[tool.uv]
+package = true
+default-groups = ["dev"]
+
+[tool.ruff]
+line-length = 79
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "W", "F"]

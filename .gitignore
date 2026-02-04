@@ -1,0 +1,10 @@
+/tmp/
+/.specstory/
+/.ruff_cache/
+/AGENTS.md
+tmp/
+/.venv/
+/dist/
+/*.egg-info
+/build/
+__pycache__/
