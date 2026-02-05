@@ -1,5 +1,5 @@
 [project]
-name = "skills-mcp"
+name = "flowtrica-skills"
 version = "0.2.0"
 description = "MCP server that exposes Claude-style skills to any MCP client."
 readme = "README.md"
