@@ -51,25 +51,92 @@ pip install progressive-skills-mcp
 progressive-skills-mcp
 ```
 
+## System Prompt Configuration
+
+Progressive disclosure works by adding skill metadata to your LLM agent's system prompt. This tells the agent what skills are available **without** loading all the detailed instructions.
+
+### Step 1: Generate Metadata
+
+```bash
+progressive-skills-mcp --generate-metadata > skills-metadata.txt
+```
+
+This outputs:
+
+```markdown
+## Available Skills
+
+You have access to specialized skills that provide detailed instructions for specific tasks. When a task requires specialized knowledge or a specific workflow, use the `load_skill` tool to get the full instructions.
+
+### How to Use Skills
+
+1. Check if a skill is relevant to the user's request
+2. Call `load_skill("skill-name")` to get detailed instructions
+3. Follow the instructions in the skill
+4. Use `read_skill_file()` if the skill references additional resources
+
+**Available skills:**
+
+- **context7-docs-lookup**: Look up documentation from Context7 for libraries and frameworks
+```
+
+### Step 2: Add to Agent System Prompt
+
+Copy the metadata output and add it to your LLM agent's system prompt. For example, in **Onyx**, **LibreChat**, or **Open WebUI**:
+
+```
+You are a helpful AI assistant.
+
+[... other system prompt content ...]
+
+## Available Skills
+
+You have access to specialized skills that provide detailed instructions for specific tasks...
+
+- **context7-docs-lookup**: Look up documentation from Context7...
+```
+
+### Step 3: Agent Uses Skills
+
+When relevant, the agent will:
+
+1. **See skill in system prompt** → "context7-docs-lookup is available"
+2. **Call load_skill** → `load_skill("context7-docs-lookup")`
+3. **Receive full instructions** → Complete SKILL.md content
+4. **Follow instructions** → Execute the skill workflow
+
+### Example Conversation
+
+**User:** "How do I use React hooks in Next.js?"
+
+**Agent thinks:** *The context7-docs-lookup skill can help with documentation lookup*
+
+**Agent calls:** `load_skill("context7-docs-lookup")`
+
+**Agent receives:** Full skill instructions on how to use Context7 API
+
+**Agent executes:** Follows skill instructions to look up Next.js documentation
+
+**Agent responds:** "Here's how to use React hooks in Next.js..." (with accurate docs)
+
 ## Progressive Disclosure
 
 ### Level 1: System Prompt (Once per conversation)
 ```markdown
 ## Available Skills
-- **weather**: Get weather forecasts
-- **pptx**: Create presentations
+- **context7-docs-lookup**: Look up documentation
 ```
 **Cost:** ~200 tokens, sent ONCE
 
 ### Level 2: On-Demand Instructions
 ```python
-load_skill("pptx")  # Returns full SKILL.md
+load_skill("context7-docs-lookup")  # Returns full SKILL.md
 ```
 **Cost:** 0 tokens until loaded
 
 ### Level 3: Referenced Resources  
 ```python
-read_skill_file("pptx", "references/api.md")
+read_skill_file("context7-docs-lookup", "references/api.md")
 ```
 **Cost:** 0 tokens until accessed
 
@@ -84,16 +151,22 @@ read_skill_file("pptx", "references/api.md")
 For Onyx or other MCP clients that support system prompts:
 
 ```bash
+# Markdown format (default)
 progressive-skills-mcp --generate-metadata
+
+# JSON format
+progressive-skills-mcp --generate-metadata --format json
 ```
 
-Output:
-```markdown
-## Available Skills
-
-You have access to specialized skills...
-
-- **context7-docs-lookup**: Look up documentation from Context7
+JSON output:
+```json
+[
+  {
+    "name": "context7-docs-lookup",
+    "description": "Look up documentation from Context7 for libraries and frameworks",
+    "allowed_tools": []
+  }
+]
 ```
 
 ## Usage
