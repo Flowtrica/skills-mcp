@@ -21,17 +21,77 @@ Based on [intellectronica/skillz](https://github.com/intellectronica/skillz) wit
 ✅ Metadata generation for system prompts  
 ✅ Compatible with all SKILL.md format files  
 ✅ Supports .zip and .skill archives  
-✅ Bundled skills ready to use  
+✅ Use your own skills - no forking required!  
 
 ## Quick Start
 
-### Using uvx (Recommended)
+### 1. Install the MCP Server
 
 ```bash
-uvx progressive-skills-mcp
+pip install progressive-skills-mcp
 ```
 
-### With MCPHub
+### 2. Add Your Skills
+
+Put your skills in `~/.skillz/` or any directory you choose:
+
+```bash
+mkdir -p ~/.skillz
+# Add skill directories or .zip files
+```
+
+**Or clone an existing skills repo:**
+
+```bash
+git clone https://github.com/Flowtrica/agent-skills.git ~/.skillz
+```
+
+### 3. Run the Server
+
+```bash
+# Use default location (~/.skillz)
+progressive-skills-mcp
+
+# Or specify custom directory
+progressive-skills-mcp /path/to/your/skills
+```
+
+## Using with MCPHub
+
+### Option 1: Local Skills Directory
+
+If your skills are on the same machine as MCPHub:
+
+```json
+{
+  "mcpServers": {
+    "skills": {
+      "command": "uvx",
+      "args": ["progressive-skills-mcp", "/path/to/skills"]
+    }
+  }
+}
+```
+
+### Option 2: Clone Skills from Git
+
+Skills cloned fresh each time MCPHub starts:
+
+```json
+{
+  "mcpServers": {
+    "skills": {
+      "command": "sh",
+      "args": [
+        "-c",
+        "cd /tmp && rm -rf skills && git clone https://github.com/YOUR_USERNAME/your-skills.git skills && uvx progressive-skills-mcp /tmp/skills"
+      ]
+    }
+  }
+}
+```
+
+### Option 3: Just the Server (Uses ~/.skillz)
 
 ```json
 {
@@ -44,13 +104,6 @@ uvx progressive-skills-mcp
 }
 ```
 
-### Using pip
-
-```bash
-pip install progressive-skills-mcp
-progressive-skills-mcp
-```
-
 ## System Prompt Configuration
 
 Progressive disclosure works by adding skill metadata to your LLM agent's system prompt. This tells the agent what skills are available **without** loading all the detailed instructions.
@@ -58,7 +111,11 @@ Progressive disclosure works by adding skill metadata to your LLM agent's system
 ### Step 1: Generate Metadata
 
 ```bash
-progressive-skills-mcp --generate-metadata > skills-metadata.txt
+# Generate from default location
+progressive-skills-mcp --generate-metadata
+
+# Or from custom directory
+progressive-skills-mcp --generate-metadata /path/to/skills
 ```
 
 This outputs:
@@ -119,7 +176,7 @@ When relevant, the agent will:
 
 **Agent responds:** "Here's how to use React hooks in Next.js..." (with accurate docs)
 
-## Progressive Disclosure
+## Progressive Disclosure Explained
 
 ### Level 1: System Prompt (Once per conversation)
 ```markdown
@@ -132,90 +189,97 @@ When relevant, the agent will:
 ```python
 load_skill("context7-docs-lookup")  # Returns full SKILL.md
 ```
-**Cost:** 0 tokens until loaded
+**Cost:** 0 tokens until loaded (only when needed!)
 
 ### Level 3: Referenced Resources  
 ```python
 read_skill_file("context7-docs-lookup", "references/api.md")
 ```
-**Cost:** 0 tokens until accessed
+**Cost:** 0 tokens until accessed (only when the skill needs it!)
 
 ## Three Universal Tools
+
+These tools are available regardless of how many skills you have:
 
 1. **`load_skill(skill_name)`** - Returns SKILL.md body without frontmatter
 2. **`read_skill_file(skill_name, file_path)`** - Returns specific resource file
 3. **`list_skill_files(skill_name, subdirectory?)`** - Lists available resources
 
-## Generate Metadata
-
-For Onyx or other MCP clients that support system prompts:
+## Usage Examples
 
 ```bash
-# Markdown format (default)
-progressive-skills-mcp --generate-metadata
-
-# JSON format
-progressive-skills-mcp --generate-metadata --format json
-```
-
-JSON output:
-```json
-[
-  {
-    "name": "context7-docs-lookup",
-    "description": "Look up documentation from Context7 for libraries and frameworks",
-    "allowed_tools": []
-  }
-]
-```
-
-## Usage
-
-```bash
-# Run MCP server with bundled skills
+# Run with default skills directory (~/.skillz)
 progressive-skills-mcp
 
-# Run with custom skills directory
+# Run with custom directory
 progressive-skills-mcp /path/to/skills
 
-# Generate metadata
+# Generate metadata for system prompt
 progressive-skills-mcp --generate-metadata
 
 # Generate JSON metadata
 progressive-skills-mcp --generate-metadata --format json
 
-# List discovered skills
+# List all discovered skills
 progressive-skills-mcp --list-skills
+
+# List skills in custom directory
+progressive-skills-mcp --list-skills /path/to/skills
 ```
 
-## Skill Format
+## Creating Your Own Skills
+
+### Skill Structure
 
 Skills can be:
 - **Directories** with SKILL.md file
 - **Zip archives** containing SKILL.md
 - **.skill archives**
 
-Example structure:
+Example:
 ```
-skills/
+~/.skillz/
 ├── weather/
 │   ├── SKILL.md
 │   └── references/
 │       └── api.md
-└── pptx.zip
+├── pptx.zip
+└── custom-skill/
+    └── SKILL.md
 ```
 
-SKILL.md format:
+### SKILL.md Format
+
 ```markdown
 ---
 name: skill-name
-description: Brief description
+description: Brief one-line description
 ---
 
-# Full Instructions
+# Skill Instructions
 
-Detailed skill instructions here...
+Detailed instructions for the AI agent to follow...
+
+## Steps
+
+1. First do this
+2. Then do that
+3. Finally, complete the task
+
+## Resources
+
+See references/api.md for API details.
 ```
+
+### Example Skills Repo
+
+Check out the example skills repo:
+https://github.com/Flowtrica/agent-skills
+
+You can:
+- Clone it: `git clone https://github.com/Flowtrica/agent-skills.git ~/.skillz`
+- Fork it and add your own skills
+- Use it as a template for your own skills repo
 
 ## Token Efficiency Comparison
 
@@ -224,6 +288,16 @@ Detailed skill instructions here...
 | Original | 20 tools | ~100 each | 2000 tokens |
 | **Progressive Skills MCP** | **3 tools** | **~50 each** | **150 tokens** |
 | **Improvement** | | | **13x better!** 🎉 |
+
+## For Skill Creators
+
+Want to share your skills with others?
+
+1. Create a GitHub repo with your skills
+2. Users can clone it: `git clone YOUR_REPO ~/.skillz`
+3. Or users can point MCPHub to it directly (see Option 2 above)
+
+No need to publish anything to PyPI - just share your skills repo!
 
 ## License
 
@@ -239,4 +313,4 @@ MIT (same as original skillz)
 
 - GitHub: https://github.com/Flowtrica/skills-mcp
 - PyPI: https://pypi.org/project/progressive-skills-mcp/
-- Skills repo: https://github.com/Flowtrica/agent-skills
+- Example skills: https://github.com/Flowtrica/agent-skills
