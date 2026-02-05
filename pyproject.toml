@@ -1,5 +1,5 @@
 [project]
-name = "flowtrica-skills"
+name = "progressive-skills-mcp"
 version = "0.2.0"
 description = "MCP server that exposes Claude-style skills to any MCP client."
 readme = "README.md"
@@ -27,7 +27,7 @@ Homepage = "https://github.com/Flowtrica/skills-mcp"
 Issues = "https://github.com/Flowtrica/skills-mcp/issues"
 
 [project.scripts]
-skills-mcp = "skills_mcp.__main__:run"
+progressive-skills-mcp = "progressive_skills_mcp.__main__:run"
 
 [build-system]
 requires = ["uv_build>=0.9.5,<0.10.0"]

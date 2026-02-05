@@ -38,7 +38,7 @@ from .progressive_disclosure import MetadataGenerator, register_progressive_disc
 
 
 
-LOGGER = logging.getLogger("skills_mcp")
+LOGGER = logging.getLogger("progressive_skills_mcp")
 FRONT_MATTER_PATTERN = re.compile(r"^---\s*\n(.*?)\n---\s*\n(.*)", re.DOTALL)
 SKILL_MARKDOWN = "SKILL.md"
 # Use bundled skills by default
