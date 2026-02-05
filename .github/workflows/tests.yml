@@ -20,7 +20,7 @@ jobs:
         uses: astral-sh/setup-uv@v3
         with:
           version: "latest"
-          python-version: "3.14"
+          python-version: "3.12"
       - name: Sync dependencies
         run: uv sync
       - name: Run Ruff
