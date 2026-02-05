@@ -27,7 +27,7 @@ Homepage = "https://github.com/Flowtrica/skills-mcp"
 Issues = "https://github.com/Flowtrica/skills-mcp/issues"
 
 [project.scripts]
-skills-mcp = "skillz.__main__:run"
+skills-mcp = "skills_mcp.__main__:run"
 
 [build-system]
 requires = ["uv_build>=0.9.5,<0.10.0"]
