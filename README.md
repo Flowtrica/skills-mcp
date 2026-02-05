@@ -1,4 +1,4 @@
-# Skills MCP
+# Progressive Skills MCP
 
 MCP server for SKILL.md files with **progressive disclosure** - achieving **13x token efficiency** over traditional approaches.
 
@@ -10,7 +10,7 @@ Based on [intellectronica/skillz](https://github.com/intellectronica/skillz) wit
 - Creates 1 tool per skill
 - 20 skills = 20 tools × ~100 tokens = **2000 tokens/request**
 
-**Skills MCP (this fork):**
+**Progressive Skills MCP:**
 - Creates 3 universal tools (`load_skill`, `read_skill_file`, `list_skill_files`)
 - 20 skills = 3 tools × ~50 tokens = **150 tokens/request**
 - **13x improvement!** 🎉
@@ -21,23 +21,14 @@ Based on [intellectronica/skillz](https://github.com/intellectronica/skillz) wit
 ✅ Metadata generation for system prompts  
 ✅ Compatible with all SKILL.md format files  
 ✅ Supports .zip and .skill archives  
-✅ Docker image available  
+✅ Bundled skills ready to use  
 
 ## Quick Start
 
-### Using Docker
+### Using uvx (Recommended)
 
 ```bash
-docker run -i --rm \
-  -v /path/to/skills:/skills \
-  flowtrica/skills-mcp:latest \
-  /skills
-```
-
-### Using uvx
-
-```bash
-uvx skills-mcp@latest /path/to/skills
+uvx progressive-skills-mcp
 ```
 
 ### With MCPHub
@@ -46,17 +37,18 @@ uvx skills-mcp@latest /path/to/skills
 {
   "mcpServers": {
     "skills": {
-      "command": "docker",
-      "args": [
-        "run", "-i", "--rm",
-        "--entrypoint", "sh",
-        "flowtrica/skills-mcp:latest",
-        "-c",
-        "git clone https://github.com/YOUR_USERNAME/your-skills.git /tmp/skills && skills-mcp /tmp/skills"
-      ]
+      "command": "uvx",
+      "args": ["progressive-skills-mcp"]
     }
   }
 }
+```
+
+### Using pip
+
+```bash
+pip install progressive-skills-mcp
+progressive-skills-mcp
 ```
 
 ## Progressive Disclosure
@@ -81,12 +73,18 @@ read_skill_file("pptx", "references/api.md")
 ```
 **Cost:** 0 tokens until accessed
 
+## Three Universal Tools
+
+1. **`load_skill(skill_name)`** - Returns SKILL.md body without frontmatter
+2. **`read_skill_file(skill_name, file_path)`** - Returns specific resource file
+3. **`list_skill_files(skill_name, subdirectory?)`** - Lists available resources
+
 ## Generate Metadata
 
 For Onyx or other MCP clients that support system prompts:
 
 ```bash
-skills-mcp --generate-metadata /path/to/skills
+progressive-skills-mcp --generate-metadata
 ```
 
 Output:
@@ -95,35 +93,26 @@ Output:
 
 You have access to specialized skills...
 
-- **test-skill**: A simple test skill
-- **weather**: Get weather forecasts
-```
-
-## Installation
-
-```bash
-pip install skills-mcp
-```
-
-Or use with `uv`:
-```bash
-uv tool install skills-mcp
+- **context7-docs-lookup**: Look up documentation from Context7
 ```
 
 ## Usage
 
 ```bash
-# Run MCP server
-skills-mcp /path/to/skills
+# Run MCP server with bundled skills
+progressive-skills-mcp
+
+# Run with custom skills directory
+progressive-skills-mcp /path/to/skills
 
 # Generate metadata
-skills-mcp --generate-metadata /path/to/skills
+progressive-skills-mcp --generate-metadata
 
 # Generate JSON metadata
-skills-mcp --generate-metadata --format json /path/to/skills
+progressive-skills-mcp --generate-metadata --format json
 
 # List discovered skills
-skills-mcp --list-skills /path/to/skills
+progressive-skills-mcp --list-skills
 ```
 
 ## Skill Format
@@ -155,19 +144,12 @@ description: Brief description
 Detailed skill instructions here...
 ```
 
-## Building Docker Image
-
-```bash
-docker build -t flowtrica/skills-mcp:latest .
-docker push flowtrica/skills-mcp:latest
-```
-
 ## Token Efficiency Comparison
 
 | Approach | Tools/Request | Tokens/Request | 20 Skills |
 |----------|--------------|----------------|-----------|
 | Original | 20 tools | ~100 each | 2000 tokens |
-| **Skills MCP** | **3 tools** | **~50 each** | **150 tokens** |
+| **Progressive Skills MCP** | **3 tools** | **~50 each** | **150 tokens** |
 | **Improvement** | | | **13x better!** 🎉 |
 
 ## License
@@ -182,6 +164,6 @@ MIT (same as original skillz)
 
 ## Links
 
-- Original skillz: https://github.com/intellectronica/skillz
+- GitHub: https://github.com/Flowtrica/skills-mcp
+- PyPI: https://pypi.org/project/progressive-skills-mcp/
 - Skills repo: https://github.com/Flowtrica/agent-skills
-- Docker Hub: https://hub.docker.com/r/flowtrica/skills-mcp
