@@ -243,7 +243,7 @@ If you're adding a skill that provides instructions for another MCP tool, use th
 
 - **skill name**: description
 
--*Context7**: Instructions for how to use the Context7 MCP which pulls up-to-date, version-specific documentation and code examples straight from the source
+- **Context7**: Instructions for how to use the Context7 MCP which pulls up-to-date, version-specific documentation and code examples straight from the source
 
 ```
 
