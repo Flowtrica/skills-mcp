@@ -1,19 +1,32 @@
 # Progressive Skills MCP
 
-MCP server for SKILL.md files with **progressive disclosure** - achieving **13x token efficiency** over traditional approaches.
+MCP server for SKILL.md files with **progressive disclosure** - achieving **13x token efficiency** over traditional MCP approaches.
 
 Based on [intellectronica/skillz](https://github.com/intellectronica/skillz) with progressive disclosure modifications inspired by Claude.ai's skills system.
 
-## What's Different?
+## Why Progressive Disclosure?
 
-**Original skillz:**
-- Creates 1 tool per skill
-- 20 skills = 20 tools × ~100 tokens = **2000 tokens/request**
+Many MCP servers load all their information upfront - every tool description, parameter, and instruction is included in each request. This consumes significant tokens even when most information isn't needed.
+
+**Traditional MCP Approach:**
+- Creates 1 tool per skill/capability
+- All tool descriptions sent with every request
+- 20 skills = 20 tools × ~100 tokens = **~2000 tokens/request**
+- Information sent whether needed or not
 
 **Progressive Skills MCP:**
-- Creates 3 universal tools (`load_skill`, `read_skill_file`, `list_skill_files`)
-- 20 skills = 3 tools × ~50 tokens = **150 tokens/request**
-- **13x improvement!** 🎉
+- Creates 3 universal tools that load skills on-demand
+- Only skill names/descriptions sent initially
+- Full instructions loaded only when needed
+- 20 skills = 3 tools × ~50 tokens + skill list = **~150 tokens/request**
+- **13x more efficient!** 🎉
+
+**The Three Levels:**
+1. **System Prompt**: Brief skill list (~200 tokens, sent once)
+2. **On-Demand Loading**: Full skill instructions (0 tokens until requested)
+3. **Referenced Resources**: Additional files (0 tokens until accessed)
+
+This approach is especially valuable when working with many skills or limited context windows.
 
 ## Features
 
@@ -35,9 +48,9 @@ Choose where to store your skills:
 
 **Local (Linux/Mac):**
 ```bash
-mkdir -p ~/.skillz
+mkdir -p ~/.skills
 # Or any other location you prefer
-mkdir -p /home/username/my-skills
+mkdir -p /home/username/skills
 ```
 
 **Local (Windows):**
@@ -55,10 +68,10 @@ You can start with an empty directory, but you'll need to add skills before the 
 
 ```bash
 # Clone example skills
-git clone https://github.com/Flowtrica/agent-skills.git ~/.skillz
+git clone https://github.com/Flowtrica/agent-skills.git ~/.skills
 
 # Or create your own
-mkdir -p ~/.skillz/my-skill
+mkdir -p ~/.skills/my-skill
 # (See "Creating Your Own Skills" section below)
 ```
 
@@ -76,7 +89,7 @@ For local development or personal use:
       "command": "uvx",
       "args": ["progressive-skills-mcp"],
       "env": {
-        "SKILLS_SOURCE": "/home/username/.skillz"
+        "SKILLS_SOURCE": "/home/username/skills"
       }
     }
   }
@@ -103,7 +116,7 @@ For local development or personal use:
 For server deployments with persistent storage:
 
 **First, mount the volume in your container:**
-- In Coolify/Docker: Mount host directory to container path
+- In Docker: Mount host directory to container path
 - Example: Host `/mnt/data/skills` → Container `/app/skills`
 
 **Then configure:**
@@ -121,24 +134,22 @@ For server deployments with persistent storage:
 }
 ```
 
-**Note:** Use the **container path** (where it's mounted inside), not the host path.
-
 ## Adding More Skills Later
 
 You can add skills to your directory at any time:
 
 **Method 1: Clone a skills repository**
 ```bash
-cd ~/.skillz  # Or your skills directory
-git clone https://github.com/Flowtrica/agent-skills.git .
+cd ~/.skills  # Or your skills directory
+git clone https://github.com/Flowtrica/agent-skills.git . # Your own skills repository or aone you have found that contains skills.
 ```
 
 **Method 2: Create individual skills**
 
 ```bash
 # Example: Adding a weather skill
-mkdir -p ~/.skillz/weather
-cat > ~/.skillz/weather/SKILL.md << 'EOF'
+mkdir -p ~/.skills/weather
+cat > ~/.skills/weather/SKILL.md << 'EOF'
 ---
 name: weather
 description: Get weather forecasts for any location
@@ -163,14 +174,22 @@ Copy this template and add it to your agent's system prompt. Update the skill li
 ```markdown
 ## Available Skills
 
-You have access to specialized skills that provide detailed instructions for specific tasks. When a task requires specialized knowledge or a specific workflow, use the `load_skill` tool to get the full instructions.
+You have access to specialized skills that provide detailed instructions for specific tasks.
 
 ### How to Use Skills
 
-1. Check if a skill is relevant to the user's request
-2. Call `load_skill("skill-name")` to get detailed instructions
-3. Follow the instructions in the skill
-4. Use `read_skill_file()` and `list_skill_files()` if the skill references additional resources
+**Before responding to each user message:**
+1. Review the available skills list below
+2. Determine if any skill would improve your response quality
+3. If a skill is relevant, call `load_skill("skill-name")` to get detailed instructions
+4. Follow the skill's instructions to complete the task
+
+**Important:** Proactively use skills based on message context - don't wait for the user to explicitly request a skill. For example, if the user asks "What's the weather like?", immediately use the weather skill without asking.
+
+**When you load a skill:**
+- Follow its instructions exactly
+- Use `read_skill_file("skill-name", "path/to/file")` if the skill references additional resources
+- Use `list_skill_files("skill-name")` to see what resources are available
 
 ### Available Skills:
 
@@ -186,14 +205,22 @@ You have access to specialized skills that provide detailed instructions for spe
 ```markdown
 ## Available Skills
 
-You have access to specialized skills that provide detailed instructions for specific tasks. When a task requires specialized knowledge or a specific workflow, use the `load_skill` tool to get the full instructions.
+You have access to specialized skills that provide detailed instructions for specific tasks.
 
 ### How to Use Skills
 
-1. Check if a skill is relevant to the user's request
-2. Call `load_skill("skill-name")` to get detailed instructions
-3. Follow the instructions in the skill
-4. Use `read_skill_file()` and `list_skill_files()` if the skill references additional resources
+**Before responding to each user message:**
+1. Review the available skills list below
+2. Determine if any skill would improve your response quality
+3. If a skill is relevant, call `load_skill("skill-name")` to get detailed instructions
+4. Follow the skill's instructions to complete the task
+
+**Important:** Proactively use skills based on message context - don't wait for the user to explicitly request a skill. For example, if the user asks "What's the weather like?", immediately use the weather skill without asking.
+
+**When you load a skill:**
+- Follow its instructions exactly
+- Use `read_skill_file("skill-name", "path/to/file")` if the skill references additional resources
+- Use `list_skill_files("skill-name")` to see what resources are available
 
 ### Available Skills:
 
@@ -318,8 +345,8 @@ Want to share your skills with others?
 
 | Approach | Tools/Request | Tokens/Request | 20 Skills |
 |----------|--------------|----------------|-----------|
-| Original Skillz | 20 tools | ~100 each | ~2000 tokens |
-| **Progressive Skills MCP** | **3 tools** | **~50 each** | **~150 tokens** |
+| Traditional MCP (one tool per skill) | 20 tools | ~100 each | ~2000 tokens |
+| **Progressive Disclosure** | **3 tools** | **~50 each** | **~150 tokens** |
 | **Improvement** | **-85%** | **-85%** | **13x better!** 🎉 |
 
 ## Supported MCP Clients
