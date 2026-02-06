@@ -2,7 +2,7 @@
 
 MCP server for SKILL.md files with **progressive disclosure** - achieving **13x token efficiency** over traditional approaches.
 
-Based on [intellectronica/skillz](https://github.com/intellectronica/skillz) with progressive disclosure modifications inspired by Claude.ai's approach.
+Based on [intellectronica/skillz](https://github.com/intellectronica/skillz) with progressive disclosure modifications inspired by Claude.ai's skills system.
 
 ## What's Different?
 
@@ -20,32 +20,12 @@ Based on [intellectronica/skillz](https://github.com/intellectronica/skillz) wit
 ✅ Progressive disclosure (3-level token efficiency)  
 ✅ Compatible with all SKILL.md format files  
 ✅ Supports .zip and .skill archives  
-✅ Flexible skills source (GitHub repos, local directories, VPS volumes)  
+✅ Flexible skills source (local directories, VPS volumes)  
 ✅ Simple `uvx` installation - works with any MCP client  
 
 ## Installation
 
-### Option 1: Using a GitHub Repository
-
-Perfect for sharing skills across machines or teams:
-
-```json
-{
-  "mcpServers": {
-    "skills": {
-      "command": "uvx",
-      "args": ["progressive-skills-mcp"],
-      "env": {
-        "SKILLS_SOURCE": "https://github.com/YOUR_USERNAME/your-skills.git"
-      }
-    }
-  }
-}
-```
-
-The server will clone the repository on startup.
-
-### Option 2: Local Installation (PC/Laptop)
+### Option 1: Local Installation (PC/Laptop)
 
 For local development or personal use:
 
@@ -79,7 +59,7 @@ For local development or personal use:
 }
 ```
 
-### Option 3: VPS with Mounted Volume
+### Option 2: VPS with Mounted Volume
 
 For server deployments with persistent storage:
 
@@ -248,10 +228,7 @@ Check out the example skills repo to get started:
 - **Repository:** https://github.com/Flowtrica/agent-skills
 - **What's included:** Sample skills demonstrating best practices
 
-You can:
-- Clone it as a starting point
-- Fork it and add your own skills
-- Use it as a reference for creating skills
+You can clone it to your local machine or VPS to use as a starting point.
 
 ## Sharing Skills
 
@@ -259,9 +236,8 @@ Want to share your skills with others?
 
 1. Create a public GitHub repository with your skills
 2. Share the repository URL
-3. Others can use it by setting `SKILLS_SOURCE` to your repo URL
-
-No PyPI publishing needed - just share the GitHub repo!
+3. Others can clone it to their local directory or VPS volume
+4. Point `SKILLS_SOURCE` to the cloned directory
 
 ## Token Efficiency Comparison
 
@@ -284,22 +260,28 @@ Configuration is similar across all clients - just adjust the JSON format to mat
 
 ## Troubleshooting
 
-### "git command not found" error
-
-If you're using a GitHub repository URL and get this error:
-
-1. Install git on your system
-2. Or use a local directory instead of a repository URL
-
 ### Skills not loading
 
-1. Check that `SKILLS_SOURCE` points to the correct directory or repository
+1. Check that `SKILLS_SOURCE` points to the correct directory
 2. Verify the directory contains valid SKILL.md files
 3. Check server logs for specific errors
+4. Ensure the path is accessible to the MCP server
 
 ### Environment variable not recognized
 
 Some MCP clients may require specific formatting for environment variables. Check your client's documentation for the correct syntax.
+
+### Path issues on Windows
+
+Windows paths need double backslashes in JSON:
+```json
+"SKILLS_SOURCE": "C:\\Users\\YourName\\skills"
+```
+
+Or use forward slashes:
+```json
+"SKILLS_SOURCE": "C:/Users/YourName/skills"
+```
 
 ## License
 
@@ -313,6 +295,6 @@ MIT (same as original skillz)
 
 ## Links
 
-- **GitHub:** https://github.com/Flowtrica/skills-mcp
+- **GitHub:** https://github.com/Flowtrica/progressive-skills-mcp
 - **PyPI:** https://pypi.org/project/progressive-skills-mcp/
 - **Example Skills:** https://github.com/Flowtrica/agent-skills

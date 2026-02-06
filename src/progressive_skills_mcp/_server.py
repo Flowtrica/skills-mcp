@@ -27,8 +27,6 @@ from typing import (
     TypedDict,
 )
 import os
-import subprocess
-import tempfile
 from urllib.parse import quote, unquote
 import base64
 
@@ -53,10 +51,12 @@ SERVER_VERSION = __version__
 def resolve_skills_source() -> Path:
     """Resolve SKILLS_SOURCE environment variable to a skills directory.
     
-    SKILLS_SOURCE can be:
-    - A Git repository URL (https://github.com/user/repo.git) - will be cloned
-    - A local directory path (/path/to/skills)
-    - Not set - defaults to ~/.skillz
+    SKILLS_SOURCE should be a local directory path:
+    - /path/to/skills (absolute path)
+    - ~/skills (home directory path)
+    - /mnt/data/skills (mounted volume)
+    
+    If not set, defaults to ~/.skillz
     
     Returns:
         Path to the skills directory
@@ -67,39 +67,7 @@ def resolve_skills_source() -> Path:
         # No env var set, use default
         return DEFAULT_SKILLS_ROOT
     
-    # Check if it's a URL
-    if skills_source.startswith(("http://", "https://")):
-        # Clone to temporary directory
-        temp_dir = Path(tempfile.gettempdir()) / "progressive-skills-mcp-clone"
-        
-        # Remove if exists and re-clone for fresh copy
-        if temp_dir.exists():
-            import shutil
-            shutil.rmtree(temp_dir)
-        
-        LOGGER.info(f"Cloning skills from: {skills_source}")
-        try:
-            subprocess.run(
-                ["git", "clone", skills_source, str(temp_dir)],
-                check=True,
-                capture_output=True,
-                text=True
-            )
-            LOGGER.info(f"Successfully cloned to: {temp_dir}")
-            return temp_dir
-        except subprocess.CalledProcessError as e:
-            LOGGER.error(f"Failed to clone repository: {e.stderr}")
-            raise SkillError(
-                f"Failed to clone skills repository from {skills_source}: {e.stderr}",
-                code="clone_failed"
-            )
-        except FileNotFoundError:
-            raise SkillError(
-                "git command not found. Please install git to use repository URLs.",
-                code="git_not_found"
-            )
-    
-    # It's a path, return as-is
+    # Return the path as-is
     return Path(skills_source)
 
 class SkillError(Exception):
