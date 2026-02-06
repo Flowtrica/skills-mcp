@@ -18,87 +18,80 @@ Based on [intellectronica/skillz](https://github.com/intellectronica/skillz) wit
 ## Features
 
 ✅ Progressive disclosure (3-level token efficiency)  
-✅ Metadata generation for system prompts  
 ✅ Compatible with all SKILL.md format files  
 ✅ Supports .zip and .skill archives  
-✅ Use your own skills - no forking required!  
+✅ Flexible skills source (GitHub repos, local directories, VPS volumes)  
+✅ Simple `uvx` installation - works with any MCP client  
 
-## Quick Start
+## Installation
 
-### 1. Install the MCP Server
+### Option 1: Using a GitHub Repository
 
-```bash
-pip install progressive-skills-mcp
-```
-
-### 2. Add Your Skills
-
-Put your skills in `~/.skillz/` or any directory you choose:
-
-```bash
-mkdir -p ~/.skillz
-# Add skill directories or .zip files
-```
-
-**Or clone an existing skills repo:**
-
-```bash
-git clone https://github.com/Flowtrica/agent-skills.git ~/.skillz
-```
-
-### 3. Run the Server
-
-```bash
-# Use default location (~/.skillz)
-progressive-skills-mcp
-
-# Or specify custom directory
-progressive-skills-mcp /path/to/your/skills
-```
-
-## Using with MCPHub
-
-### Option 1: Local Skills Directory
-
-If your skills are on the same machine as MCPHub:
+Perfect for sharing skills across machines or teams:
 
 ```json
 {
   "mcpServers": {
     "skills": {
       "command": "uvx",
-      "args": ["progressive-skills-mcp", "/path/to/skills"]
+      "args": ["progressive-skills-mcp"],
+      "env": {
+        "SKILLS_SOURCE": "https://github.com/YOUR_USERNAME/your-skills.git"
+      }
     }
   }
 }
 ```
 
-### Option 2: Clone Skills from Git
+The server will clone the repository on startup.
 
-Skills cloned fresh each time MCPHub starts:
+### Option 2: Local Installation (PC/Laptop)
 
+For local development or personal use:
+
+**Linux/Mac:**
 ```json
 {
   "mcpServers": {
     "skills": {
-      "command": "sh",
-      "args": [
-        "-c",
-        "cd /tmp && rm -rf skills && git clone https://github.com/YOUR_USERNAME/your-skills.git skills && uvx progressive-skills-mcp /tmp/skills"
-      ]
+      "command": "uvx",
+      "args": ["progressive-skills-mcp"],
+      "env": {
+        "SKILLS_SOURCE": "/home/username/.skillz"
+      }
     }
   }
 }
 ```
 
-### Option 3: Just the Server (Uses ~/.skillz)
+**Windows:**
+```json
+{
+  "mcpServers": {
+    "skills": {
+      "command": "uvx",
+      "args": ["progressive-skills-mcp"],
+      "env": {
+        "SKILLS_SOURCE": "C:\\Users\\YourName\\skills"
+      }
+    }
+  }
+}
+```
+
+### Option 3: VPS with Mounted Volume
+
+For server deployments with persistent storage:
 
 ```json
 {
   "mcpServers": {
     "skills": {
       "command": "uvx",
-      "args": ["progressive-skills-mcp"]
+      "args": ["progressive-skills-mcp"],
+      "env": {
+        "SKILLS_SOURCE": "/mnt/data/skills"
+      }
     }
   }
 }
@@ -106,19 +99,11 @@ Skills cloned fresh each time MCPHub starts:
 
 ## System Prompt Configuration
 
-Progressive disclosure works by adding skill metadata to your LLM agent's system prompt. This tells the agent what skills are available **without** loading all the detailed instructions.
+Progressive disclosure works by adding skill metadata to your LLM agent's system prompt. This tells the agent what skills are available **without** loading all the detailed instructions upfront.
 
-### Step 1: Generate Metadata
+### System Prompt Template
 
-```bash
-# Generate from default location
-progressive-skills-mcp --generate-metadata
-
-# Or from custom directory
-progressive-skills-mcp --generate-metadata /path/to/skills
-```
-
-This outputs:
+Copy this template and add it to your agent's system prompt. Update the skill list with your actual skills:
 
 ```markdown
 ## Available Skills
@@ -130,122 +115,98 @@ You have access to specialized skills that provide detailed instructions for spe
 1. Check if a skill is relevant to the user's request
 2. Call `load_skill("skill-name")` to get detailed instructions
 3. Follow the instructions in the skill
-4. Use `read_skill_file()` if the skill references additional resources
+4. Use `read_skill_file()` and `list_skill_files()` if the skill references additional resources
 
-**Available skills:**
+### Available Skills:
 
-- **context7-docs-lookup**: Look up documentation from Context7 for libraries and frameworks
+- **skill-name-1**: Brief description of what this skill does
+- **skill-name-2**: Brief description of what this skill does
+- **skill-name-3**: Brief description of what this skill does
+
+[Add more skills as needed...]
 ```
 
-### Step 2: Add to Agent System Prompt
+### Example (Filled In)
 
-Copy the metadata output and add it to your LLM agent's system prompt. For example, in **Onyx**, **LibreChat**, or **Open WebUI**:
-
-```
-You are a helpful AI assistant.
-
-[... other system prompt content ...]
-
+```markdown
 ## Available Skills
 
-You have access to specialized skills that provide detailed instructions for specific tasks...
+You have access to specialized skills that provide detailed instructions for specific tasks. When a task requires specialized knowledge or a specific workflow, use the `load_skill` tool to get the full instructions.
 
-- **context7-docs-lookup**: Look up documentation from Context7...
+### How to Use Skills
+
+1. Check if a skill is relevant to the user's request
+2. Call `load_skill("skill-name")` to get detailed instructions
+3. Follow the instructions in the skill
+4. Use `read_skill_file()` and `list_skill_files()` if the skill references additional resources
+
+### Available Skills:
+
+- **weather**: Get weather forecasts and conditions for any location
+- **pptx**: Create professional PowerPoint presentations
+- **docx**: Create and edit Word documents with formatting
+- **context7-docs**: Look up technical documentation for libraries and frameworks
 ```
 
-### Step 3: Agent Uses Skills
+### When to Update the System Prompt
 
-When relevant, the agent will:
+Update your system prompt whenever you:
+- Add a new skill to your skills directory
+- Remove a skill
+- Change a skill's name or description
 
-1. **See skill in system prompt** → "context7-docs-lookup is available"
-2. **Call load_skill** → `load_skill("context7-docs-lookup")`
-3. **Receive full instructions** → Complete SKILL.md content
-4. **Follow instructions** → Execute the skill workflow
-
-### Example Conversation
-
-**User:** "How do I use React hooks in Next.js?"
-
-**Agent thinks:** *The context7-docs-lookup skill can help with documentation lookup*
-
-**Agent calls:** `load_skill("context7-docs-lookup")`
-
-**Agent receives:** Full skill instructions on how to use Context7 API
-
-**Agent executes:** Follows skill instructions to look up Next.js documentation
-
-**Agent responds:** "Here's how to use React hooks in Next.js..." (with accurate docs)
+Simply edit the skill list in your agent's system prompt - no need to restart the MCP server.
 
 ## Progressive Disclosure Explained
 
 ### Level 1: System Prompt (Once per conversation)
 ```markdown
 ## Available Skills
-- **context7-docs-lookup**: Look up documentation
+- **context7-docs**: Look up technical documentation
 ```
-**Cost:** ~200 tokens, sent ONCE
+**Cost:** ~200 tokens, sent ONCE at the start of conversation
 
 ### Level 2: On-Demand Instructions
 ```python
-load_skill("context7-docs-lookup")  # Returns full SKILL.md
+load_skill("context7-docs")  # Returns full SKILL.md
 ```
-**Cost:** 0 tokens until loaded (only when needed!)
+**Cost:** 0 tokens until the agent actually needs it!
 
 ### Level 3: Referenced Resources  
 ```python
-read_skill_file("context7-docs-lookup", "references/api.md")
+read_skill_file("context7-docs", "references/api-guide.md")
 ```
-**Cost:** 0 tokens until accessed (only when the skill needs it!)
+**Cost:** 0 tokens until the skill specifically references it!
 
 ## Three Universal Tools
 
 These tools are available regardless of how many skills you have:
 
-1. **`load_skill(skill_name)`** - Returns SKILL.md body without frontmatter
-2. **`read_skill_file(skill_name, file_path)`** - Returns specific resource file
-3. **`list_skill_files(skill_name, subdirectory?)`** - Lists available resources
-
-## Usage Examples
-
-```bash
-# Run with default skills directory (~/.skillz)
-progressive-skills-mcp
-
-# Run with custom directory
-progressive-skills-mcp /path/to/skills
-
-# Generate metadata for system prompt
-progressive-skills-mcp --generate-metadata
-
-# Generate JSON metadata
-progressive-skills-mcp --generate-metadata --format json
-
-# List all discovered skills
-progressive-skills-mcp --list-skills
-
-# List skills in custom directory
-progressive-skills-mcp --list-skills /path/to/skills
-```
+1. **`load_skill(skill_name)`** - Returns the complete SKILL.md instructions
+2. **`read_skill_file(skill_name, file_path)`** - Returns a specific resource file from the skill
+3. **`list_skill_files(skill_name, subdirectory?)`** - Lists all available resources in a skill
 
 ## Creating Your Own Skills
 
 ### Skill Structure
 
 Skills can be:
-- **Directories** with SKILL.md file
+- **Directories** with a SKILL.md file
 - **Zip archives** containing SKILL.md
 - **.skill archives**
 
-Example:
+Example directory structure:
 ```
-~/.skillz/
+my-skills/
 ├── weather/
 │   ├── SKILL.md
 │   └── references/
-│       └── api.md
-├── pptx.zip
-└── custom-skill/
-    └── SKILL.md
+│       └── api-docs.md
+├── pptx/
+│   ├── SKILL.md
+│   └── templates/
+│       └── example.pptx
+└── custom-skill.zip
 ```
 
 ### SKILL.md Format
@@ -253,51 +214,92 @@ Example:
 ```markdown
 ---
 name: skill-name
-description: Brief one-line description
+description: Brief one-line description shown in system prompt
 ---
 
 # Skill Instructions
 
-Detailed instructions for the AI agent to follow...
+Detailed instructions for the AI agent to follow when using this skill.
+
+## Purpose
+
+Explain what this skill does and when to use it.
 
 ## Steps
 
-1. First do this
-2. Then do that
-3. Finally, complete the task
+1. First, do this...
+2. Then, do that...
+3. Finally, complete the task...
 
 ## Resources
 
-See references/api.md for API details.
+You can reference additional files:
+- See `references/api-docs.md` for API details
+- Use `templates/example.pptx` as a template
+
+## Notes
+
+Any additional tips or warnings for using this skill.
 ```
 
-### Example Skills Repo
+### Example Skills Repository
 
-Check out the example skills repo:
-https://github.com/Flowtrica/agent-skills
+Check out the example skills repo to get started:
+- **Repository:** https://github.com/Flowtrica/agent-skills
+- **What's included:** Sample skills demonstrating best practices
 
 You can:
-- Clone it: `git clone https://github.com/Flowtrica/agent-skills.git ~/.skillz`
+- Clone it as a starting point
 - Fork it and add your own skills
-- Use it as a template for your own skills repo
+- Use it as a reference for creating skills
+
+## Sharing Skills
+
+Want to share your skills with others?
+
+1. Create a public GitHub repository with your skills
+2. Share the repository URL
+3. Others can use it by setting `SKILLS_SOURCE` to your repo URL
+
+No PyPI publishing needed - just share the GitHub repo!
 
 ## Token Efficiency Comparison
 
 | Approach | Tools/Request | Tokens/Request | 20 Skills |
 |----------|--------------|----------------|-----------|
-| Original | 20 tools | ~100 each | 2000 tokens |
-| **Progressive Skills MCP** | **3 tools** | **~50 each** | **150 tokens** |
-| **Improvement** | | | **13x better!** 🎉 |
+| Original Skillz | 20 tools | ~100 each | ~2000 tokens |
+| **Progressive Skills MCP** | **3 tools** | **~50 each** | **~150 tokens** |
+| **Improvement** | **-85%** | **-85%** | **13x better!** 🎉 |
 
-## For Skill Creators
+## Supported MCP Clients
 
-Want to share your skills with others?
+Progressive Skills MCP works with any MCP-compatible client:
+- Claude Desktop
+- Cherry Studio  
+- Cline
+- Zed
+- And any other client supporting the MCP protocol
 
-1. Create a GitHub repo with your skills
-2. Users can clone it: `git clone YOUR_REPO ~/.skillz`
-3. Or users can point MCPHub to it directly (see Option 2 above)
+Configuration is similar across all clients - just adjust the JSON format to match your client's requirements.
 
-No need to publish anything to PyPI - just share your skills repo!
+## Troubleshooting
+
+### "git command not found" error
+
+If you're using a GitHub repository URL and get this error:
+
+1. Install git on your system
+2. Or use a local directory instead of a repository URL
+
+### Skills not loading
+
+1. Check that `SKILLS_SOURCE` points to the correct directory or repository
+2. Verify the directory contains valid SKILL.md files
+3. Check server logs for specific errors
+
+### Environment variable not recognized
+
+Some MCP clients may require specific formatting for environment variables. Check your client's documentation for the correct syntax.
 
 ## License
 
@@ -311,6 +313,6 @@ MIT (same as original skillz)
 
 ## Links
 
-- GitHub: https://github.com/Flowtrica/skills-mcp
-- PyPI: https://pypi.org/project/progressive-skills-mcp/
-- Example skills: https://github.com/Flowtrica/agent-skills
+- **GitHub:** https://github.com/Flowtrica/skills-mcp
+- **PyPI:** https://pypi.org/project/progressive-skills-mcp/
+- **Example Skills:** https://github.com/Flowtrica/agent-skills
