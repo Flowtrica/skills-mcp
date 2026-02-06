@@ -240,13 +240,11 @@ You have access to specialized skills that provide detailed instructions for spe
 
 If you're adding a skill that provides instructions for another MCP tool, use this format in the system prompt;
 ```markdown
----
+
 - **skill name**: description
 
-### Example for Context7:
+-*Context7**: Instructions for how to use the Context7 MCP which pulls up-to-date, version-specific documentation and code examples straight from the source
 
--*context7**: Instructions for how to use the Context7 MCP which pulls up-to-date, version-specific documentation and code examples straight from the source
----
 ```
 
 **Why this format matters:** Starting the description with "Instructions for how to use the [MCP Tool Name]" is critical. It tells the agent this skill should be loaded *before* using that MCP tool. Without this pattern, the agent won't consistently recognize when to use the skill.
