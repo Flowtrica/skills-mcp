@@ -332,19 +332,9 @@ Any additional tips or warnings for using this skill.
 
 ### Creating Skills for MCP Tools
 
-If you're creating a skill that provides instructions for another MCP tool, follow this pattern:
+If you're creating a skill that provides instructions for another MCP tool, the key is the **description format in the frontmatter**.
 
-**Description Format (Critical):**
-```markdown
----
-name: tool-name
-description: Instructions for how to use the [MCP Tool Name]. Brief description of what the tool does
----
-```
-
-**Why this matters:** Starting the description with "Instructions for how to use the [MCP Tool Name]" is essential for the agent to recognize that it should load this skill *before* using that MCP tool.
-
-**Example - Context7 MCP Skill:**
+**In your SKILL.md file, use this frontmatter:**
 ```markdown
 ---
 name: context7
@@ -353,32 +343,15 @@ description: Instructions for how to use the Context7 MCP which pulls up-to-date
 
 # Context7 Usage Guide
 
-This skill teaches you how to effectively use the Context7 MCP tool.
-
-## When to Use Context7
-
-Use Context7 when you need:
-- Up-to-date library documentation
-- Version-specific code examples
-- Official API references
-
-## Steps
-
-1. First, resolve the library ID: Call `context7-resolve-library-id` with the library name
-2. Review the available library options and select the best match
-3. Then, query documentation: Call `context7-query-docs` with the library ID and your specific question
-
-## Best Practices
-
-- Always resolve the library ID first before querying
-- Be specific in your documentation queries
-- Check the source reputation and benchmark scores when selecting libraries
+[Rest of your skill instructions go here - this content is loaded on-demand when the agent calls load_skill("context7")]
 ```
 
-This pattern ensures the agent will:
-1. Recognize when Context7 might be useful
-2. Load the context7 skill first
-3. Follow the proper workflow to use the Context7 MCP tool effectively
+**In your system prompt, you only include the description:**
+```markdown
+- **context7**: Instructions for how to use the Context7 MCP which pulls up-to-date, version-specific documentation and code examples straight from the source
+```
+
+**Why this format matters:** Starting the description with "Instructions for how to use the [MCP Tool Name]" is critical. It tells the agent this skill should be loaded *before* using that MCP tool. Without this pattern, the agent won't consistently recognize when to use the skill.
 
 ### Example Skills Repository
 
