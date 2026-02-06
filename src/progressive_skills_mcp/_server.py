@@ -299,10 +299,14 @@ class SkillRegistry:
         return tuple(self._skills_by_slug.values())
 
     def load(self) -> None:
-        if not self.root.exists() or not self.root.is_dir():
+        # Create skills directory if it doesn't exist
+        if not self.root.exists():
+            LOGGER.info("Skills directory %s does not exist, creating it", self.root)
+            self.root.mkdir(parents=True, exist_ok=True)
+        
+        if not self.root.is_dir():
             raise SkillError(
-                f"Skills root {self.root} does not exist "
-                "or is not a directory."
+                f"Skills root {self.root} exists but is not a directory."
             )
 
         LOGGER.info("Discovering skills in %s", self.root)
@@ -312,7 +316,10 @@ class SkillRegistry:
         root = self.root.resolve()
         self._scan_directory(root)
 
-        LOGGER.info("Loaded %d skills", len(self._skills_by_slug))
+        if len(self._skills_by_slug) == 0:
+            LOGGER.warning("No skills found in %s. Add skill directories or .zip files to enable skills.", self.root)
+        else:
+            LOGGER.info("Loaded %d skills", len(self._skills_by_slug))
 
     def _scan_directory(self, directory: Path) -> None:
         """Recursively scan directory for skills (both dirs and zips)."""

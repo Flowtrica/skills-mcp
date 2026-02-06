@@ -77,6 +77,45 @@ For server deployments with persistent storage:
 }
 ```
 
+## Adding Skills
+
+**Important:** The skills directory can be empty when you first install the MCP server - it will start successfully and you can add skills later.
+
+### Quick Start
+
+1. **Create your skills directory** (if it doesn't exist):
+   ```bash
+   mkdir -p ~/.skillz  # Or your chosen path
+   ```
+
+2. **Add skills** - You can:
+   - Clone from GitHub: `git clone https://github.com/Flowtrica/agent-skills.git ~/.skillz`
+   - Create your own skill directories
+   - Add .zip skill files
+
+3. **Restart your MCP client** to load the new skills
+
+### Adding Individual Skills
+
+To add a skill, simply create a directory or .zip file in your skills folder:
+
+```bash
+# Example: Adding a weather skill
+mkdir -p ~/.skillz/weather
+cat > ~/.skillz/weather/SKILL.md << 'EOF'
+---
+name: weather
+description: Get weather forecasts for any location
+---
+
+# Weather Skill
+
+This skill helps you get weather information...
+EOF
+```
+
+The server will find it automatically when restarted.
+
 ## System Prompt Configuration
 
 Progressive disclosure works by adding skill metadata to your LLM agent's system prompt. This tells the agent what skills are available **without** loading all the detailed instructions upfront.
