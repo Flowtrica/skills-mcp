@@ -1244,6 +1244,7 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
         choices=["markdown", "json"],
         default="markdown",
         help="Output format for metadata (default: markdown)",
+    )
     args = parser.parse_args(argv)
     skills_root = args.skills_root or resolve_skills_source()
     if not isinstance(skills_root, Path):
