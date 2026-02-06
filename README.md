@@ -25,6 +25,45 @@ Based on [intellectronica/skillz](https://github.com/intellectronica/skillz) wit
 
 ## Installation
 
+**Important:** Before installing, you must create a skills directory and optionally add some skills to it. The server will not start without a valid skills directory.
+
+### Setup Steps
+
+**Step 1: Create Your Skills Directory**
+
+Choose where to store your skills:
+
+**Local (Linux/Mac):**
+```bash
+mkdir -p ~/.skillz
+# Or any other location you prefer
+mkdir -p /home/username/my-skills
+```
+
+**Local (Windows):**
+```powershell
+mkdir C:\Users\YourName\skills
+```
+
+**VPS/Container:**
+- Create a volume or persistent directory on your host
+- Mount it to your container (e.g., `/mnt/data/skills` → `/app/skills`)
+
+**Step 2: Add Skills (Optional)**
+
+You can start with an empty directory, but you'll need to add skills before the MCP server can do anything useful:
+
+```bash
+# Clone example skills
+git clone https://github.com/Flowtrica/agent-skills.git ~/.skillz
+
+# Or create your own
+mkdir -p ~/.skillz/my-skill
+# (See "Creating Your Own Skills" section below)
+```
+
+**Step 3: Configure Your MCP Client**
+
 ### Option 1: Local Installation (PC/Laptop)
 
 For local development or personal use:
@@ -63,6 +102,11 @@ For local development or personal use:
 
 For server deployments with persistent storage:
 
+**First, mount the volume in your container:**
+- In Coolify/Docker: Mount host directory to container path
+- Example: Host `/mnt/data/skills` → Container `/app/skills`
+
+**Then configure:**
 ```json
 {
   "mcpServers": {
@@ -70,34 +114,26 @@ For server deployments with persistent storage:
       "command": "uvx",
       "args": ["progressive-skills-mcp"],
       "env": {
-        "SKILLS_SOURCE": "/mnt/data/skills"
+        "SKILLS_SOURCE": "/app/skills"
       }
     }
   }
 }
 ```
 
-## Adding Skills
+**Note:** Use the **container path** (where it's mounted inside), not the host path.
 
-**Important:** The skills directory can be empty when you first install the MCP server - it will start successfully and you can add skills later.
+## Adding More Skills Later
 
-### Quick Start
+You can add skills to your directory at any time:
 
-1. **Create your skills directory** (if it doesn't exist):
-   ```bash
-   mkdir -p ~/.skillz  # Or your chosen path
-   ```
+**Method 1: Clone a skills repository**
+```bash
+cd ~/.skillz  # Or your skills directory
+git clone https://github.com/Flowtrica/agent-skills.git .
+```
 
-2. **Add skills** - You can:
-   - Clone from GitHub: `git clone https://github.com/Flowtrica/agent-skills.git ~/.skillz`
-   - Create your own skill directories
-   - Add .zip skill files
-
-3. **Restart your MCP client** to load the new skills
-
-### Adding Individual Skills
-
-To add a skill, simply create a directory or .zip file in your skills folder:
+**Method 2: Create individual skills**
 
 ```bash
 # Example: Adding a weather skill

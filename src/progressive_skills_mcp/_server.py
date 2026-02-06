@@ -299,14 +299,10 @@ class SkillRegistry:
         return tuple(self._skills_by_slug.values())
 
     def load(self) -> None:
-        # Create skills directory if it doesn't exist
-        if not self.root.exists():
-            LOGGER.info("Skills directory %s does not exist, creating it", self.root)
-            self.root.mkdir(parents=True, exist_ok=True)
-        
-        if not self.root.is_dir():
+        if not self.root.exists() or not self.root.is_dir():
             raise SkillError(
-                f"Skills root {self.root} exists but is not a directory."
+                f"Skills directory {self.root} does not exist or is not a directory. "
+                f"Please create the directory and add your skills before starting the server."
             )
 
         LOGGER.info("Discovering skills in %s", self.root)
@@ -317,7 +313,7 @@ class SkillRegistry:
         self._scan_directory(root)
 
         if len(self._skills_by_slug) == 0:
-            LOGGER.warning("No skills found in %s. Add skill directories or .zip files to enable skills.", self.root)
+            LOGGER.warning("No skills found in %s. The directory is empty - add skill directories or .zip files to enable skills.", self.root)
         else:
             LOGGER.info("Loaded %d skills", len(self._skills_by_slug))
 
