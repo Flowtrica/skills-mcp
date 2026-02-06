@@ -4,7 +4,7 @@ version = "0.4.2"
 description = "MCP server that exposes Claude-style skills to any MCP client."
 readme = "README.md"
 authors = [
-    { name = "Eleanor Berger", email = "eleanor@intellectronica.net" }
+    { name = "Flowtrica", email = "flowtrica@flowtrica.com" }
 ]
 requires-python = ">=3.12"
 dependencies = [
